@@ -1,5 +1,6 @@
 from board import Board, Cell
 from evaluation import  evaluate
+
 class Ai:
     def __init__(self, ai_player: Cell):
         self.ai = ai_player
@@ -34,9 +35,25 @@ class Ai:
                     alpha = score
                     best_move = move_col
 
+                if alpha >= beta:
+                    break
+
+            return alpha, best_move
+
 
 
         else:
-            pass
+            for move_col in board.valid_moves():
+                node_board = board.copy()
+                node_board.drop_piece(col=move_col, player=self.human)
+                score,_ = self.minimax(board=node_board, alpha=alpha, beta= beta, maximising= not maximising, depth=depth - 1)
 
-        return alpha, best_move
+                if score < beta: 
+                    beta = score
+                    best_move = move_col
+
+                if alpha >= beta :
+                    break
+            return beta, best_move
+
+
