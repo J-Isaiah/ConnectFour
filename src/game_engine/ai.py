@@ -6,6 +6,16 @@ class Ai:
         self.ai = ai_player
         self.human = Cell.YELLOW if ai_player == Cell.RED else Cell.RED
 
+    def get_best_move(self, board):
+        score, col = self.minimax(
+        board=board,
+        alpha=-1_000_000,
+        beta=1_000_000,
+        maximising=True,
+        depth=5
+    )
+        return col
+
     def minimax(self,board: Board, alpha: int, beta:int, maximising: bool = True,depth:int = 5):
         best_move = None
         
