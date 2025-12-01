@@ -63,9 +63,9 @@ class Board:
         Returns:
             Board: Deep copy of the current board state
         """
-        new_board = Board()
-        new_board.grid = [row.copy() for row in self.grid]
-        return new_board
+        new = Board()
+        new.grid = [row[:] for row in self.grid]
+        return new
 
     def check_win(self, player: Cell) -> bool:
         """Checks if a winning condition is meet on the board

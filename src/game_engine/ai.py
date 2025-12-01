@@ -1,69 +1,79 @@
-from board import Board, Cell
-from evaluation import  evaluate
+from game_engine.board import Board, Cell
+from game_engine.evaluation import evaluate
+
 
 class Ai:
     def __init__(self, ai_player: Cell):
         self.ai = ai_player
         self.human = Cell.YELLOW if ai_player == Cell.RED else Cell.RED
 
-    def get_best_move(self, board):
+    def get_best_move(self, board: Board, depth: int = 6) -> int | None:
         score, col = self.minimax(
-        board=board,
-        alpha=-1_000_000,
-        beta=1_000_000,
-        maximising=True,
-        depth=5
-    )
+            board=board,
+            depth=depth,
+            alpha=-(10**12),
+            beta=10**12,
+            maximizing=True,
+        )
         return col
 
-    def minimax(self,board: Board, alpha: int, beta:int, maximising: bool = True,depth:int = 5):
-        best_move = None
-        
+    def minimax(
+        self, board: Board, depth: int, alpha: int, beta: int, maximizing: bool
+    ):
 
-       
         if board.check_win(self.ai):
-            return 1000000, None
-
-        elif board.check_win(self.human):
-            return -1000000, None
-
-        elif board.is_full():
+            return 10**9, None
+        if board.check_win(self.human):
+            return -(10**9), None
+        if board.is_full():
             return 0, None
-        
-        elif depth == 0:
-            return evaluate(board=board, player=self.ai), None
-        
-              
+        if depth == 0:
+            return evaluate(board, player=self.ai), None
 
-        if maximising:
-            for move_col in board.valid_moves():
-                node_board = board.copy()
-                node_board.drop_piece(col=move_col, player=self.ai)
-                score,_ = self.minimax(board=node_board, alpha=alpha, beta= beta, maximising= not maximising, depth=depth - 1)
+        valid_moves = board.valid_moves()
+        center = Board.COLUMNS // 2
+        ordered_moves = sorted(valid_moves, key=lambda c: abs(center - c))
 
-                if score > alpha: 
-                    alpha = score
-                    best_move = move_col
+        best_col = None
 
+        if maximizing:
+            value = -(10**12)
+            for col in ordered_moves:
+                node = board.copy()
+                node.drop_piece(col, self.ai)
+
+                if node.check_win(self.ai):
+                    return 10**9, col
+
+                score, _ = self.minimax(node, depth - 1, alpha, beta, False)
+
+                if score > value:
+                    value = score
+                    best_col = col
+
+                alpha = max(alpha, value)
                 if alpha >= beta:
                     break
 
-            return alpha, best_move
-
-
+            return value, best_col
 
         else:
-            for move_col in board.valid_moves():
-                node_board = board.copy()
-                node_board.drop_piece(col=move_col, player=self.human)
-                score,_ = self.minimax(board=node_board, alpha=alpha, beta= beta, maximising= not maximising, depth=depth - 1)
+            value = 10**12
+            for col in ordered_moves:
+                node = board.copy()
+                node.drop_piece(col, self.human)
 
-                if score < beta: 
-                    beta = score
-                    best_move = move_col
+                if node.check_win(self.human):
+                    return -(10**9), col
 
-                if alpha >= beta :
+                score, _ = self.minimax(node, depth - 1, alpha, beta, True)
+
+                if score < value:
+                    value = score
+                    best_col = col
+
+                beta = min(beta, value)
+                if alpha >= beta:
                     break
-            return beta, best_move
 
-
+            return value, best_col

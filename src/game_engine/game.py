@@ -1,6 +1,11 @@
 from enum import Enum, auto
-from board import Board, Cell
-from errors import ConnectFourError, InvalidMoveError, ColumnFullError, GameOverError
+from game_engine.board import Board, Cell
+from game_engine.errors import (
+    ConnectFourError,
+    InvalidMoveError,
+    ColumnFullError,
+    GameOverError,
+)
 
 
 class MoveResult(Enum):
@@ -20,7 +25,7 @@ class Game:
         if not self.board.is_valid_move(col):
             raise InvalidMoveError(f"Column {col} is not a valid move")
         elif self.game_over():
-            return GameOverError("Cannot Play Move after game is over.")
+            raise GameOverError("Cannot Play Move after game is over.")
 
         self.board.drop_piece(col, self.cur_player)
 

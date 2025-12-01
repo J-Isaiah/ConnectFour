@@ -1,4 +1,4 @@
-from board import Board, Cell
+from game_engine.board import Board, Cell
 
 
 def evaluate(board: Board, player: Cell) -> int:
